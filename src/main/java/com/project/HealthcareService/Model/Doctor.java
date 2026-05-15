@@ -22,4 +22,7 @@ public class Doctor {
     private String gender;
     private String specialization;
     private String contact;
+    private String experience;
+    private String introduction;
+    private String availability;
 }

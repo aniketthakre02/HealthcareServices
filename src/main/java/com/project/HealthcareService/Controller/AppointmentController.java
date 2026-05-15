@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AppointmentController {
     private final AppointmentService appointmentService;
-    @PostMapping
+    @PostMapping("/BookAppointment")
     @PreAuthorize("hasAuthority('ROLE_PATIENT')")
     public ResponseEntity<AppointmentResponse> createAppointment(
             @Valid @RequestBody CreateAppointmentRequest request,
@@ -27,7 +27,7 @@ public class AppointmentController {
         AppointmentResponse response= appointmentService.createAppointment(email, request);
         return ResponseEntity.ok(response);
     }
-    @GetMapping("/myappointments")
+    @GetMapping("/myAppointments")
     @PreAuthorize("hasRole('PATIENT')")
     public List<AppointmentResponse> getMyAppointments(Authentication authentication){
 //        ApplicationUser user =(ApplicationUser)authentication.getPrincipal();

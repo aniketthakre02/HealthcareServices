@@ -16,4 +16,6 @@ public class CreateAppointmentRequest {
     private LocalDateTime dateTime;
     @NotBlank(message = "Reason is required")
     private String reason;
+    private String doctorName;
+
 }

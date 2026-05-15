@@ -3,7 +3,6 @@ package com.project.HealthcareService.Service;
 import com.project.HealthcareService.DTOs.request.UpdateDoctorProfileRequest;
 import com.project.HealthcareService.DTOs.response.AppointmentResponse;
 import com.project.HealthcareService.DTOs.response.DoctorProfileResponse;
-import com.project.HealthcareService.Model.Appointment;
 import com.project.HealthcareService.Model.AppointmentStatus;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +12,7 @@ import java.util.List;
 public interface DoctorService {
     DoctorProfileResponse getMyProfile(String email);
     DoctorProfileResponse updateMyProfile(String email, UpdateDoctorProfileRequest request);
-    List<Appointment> getMyAppointments(String email);
+    List<AppointmentResponse> getMyAppointments(String email);
+    List<DoctorProfileResponse> getAllDoctors();
     AppointmentResponse updateAppointmentStatus(Long appointmentId, AppointmentStatus status);
 }

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class ApplicationUserController {
     private  final ApplicationUserService userService;
@@ -33,14 +34,13 @@ public class ApplicationUserController {
     }
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String,String> req){
-        System.out.println("are we here");
         String email=req.get("email");
         String password=req.get("password");
-        System.out.println(email+"-"+password);
         String token= userService.login(email,password);
         System.out.println(token);
         Map<String,Object>res=new HashMap<>();
         res.put("token",token);
         return res;
     }
+
 }

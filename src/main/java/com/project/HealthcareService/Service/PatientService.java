@@ -1,5 +1,6 @@
 package com.project.HealthcareService.Service;
 
+import com.project.HealthcareService.DTOs.request.ChangePasswordRequest;
 import com.project.HealthcareService.DTOs.request.UpdatePatientProfileRequest;
 import com.project.HealthcareService.DTOs.response.AppointmentResponse;
 import com.project.HealthcareService.DTOs.response.PatientProfileResponse;
@@ -14,4 +15,8 @@ public interface PatientService {
 
     List<AppointmentResponse> getMyAppointments(String email);
     AppointmentResponse cancelAppointment(Long appointmentId,String email);
+
+    void changePassword(String name,ChangePasswordRequest req);
+
+
 }

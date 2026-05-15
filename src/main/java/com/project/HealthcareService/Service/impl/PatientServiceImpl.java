@@ -1,17 +1,20 @@
 package com.project.HealthcareService.Service.impl;
 
+import com.project.HealthcareService.DTOs.request.ChangePasswordRequest;
 import com.project.HealthcareService.DTOs.request.UpdatePatientProfileRequest;
 import com.project.HealthcareService.DTOs.response.AppointmentResponse;
 import com.project.HealthcareService.DTOs.response.PatientProfileResponse;
 import com.project.HealthcareService.Model.ApplicationUser;
 import com.project.HealthcareService.Model.Appointment;
-import com.project.HealthcareService.Model.AppointmentStatus;
+import com.project.HealthcareService.Model.Doctor;
 import com.project.HealthcareService.Model.Patient;
 import com.project.HealthcareService.Repository.ApplicationUserRepository;
 import com.project.HealthcareService.Repository.AppointmentRepository;
+import com.project.HealthcareService.Repository.DoctorRepository;
 import com.project.HealthcareService.Repository.PatientRepository;
 import com.project.HealthcareService.Service.PatientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +26,9 @@ public class PatientServiceImpl implements PatientService {
     private final PatientRepository patientRepo;
     private final ApplicationUserRepository repo;
     private  final AppointmentRepository appointmentRepo;
+    private final PasswordEncoder encoder;
+    private final DoctorRepository doctorRepo;
+
     @Override
     public Optional<PatientProfileResponse> getProfileByEmail(String email) {
         ApplicationUser user = repo
@@ -69,9 +75,14 @@ public class PatientServiceImpl implements PatientService {
                 .toList();
     }
     private AppointmentResponse mapToResponse(Appointment appointment) {
+        String doctorName = doctorRepo.findById(appointment.getDoctorId())
+                .map(Doctor::getUserName)   // assuming field is userName
+                .orElse("Unknown Doctor");
+
         return AppointmentResponse.builder()
                 .id(appointment.getId())
                 .patientEmail(appointment.getPatientEmail())
+                .doctorName(doctorName)
                 .doctorId(appointment.getDoctorId())
                 .dateTime(appointment.getDateTime())
                 .reason(appointment.getReason())
@@ -82,4 +93,17 @@ public class PatientServiceImpl implements PatientService {
     public AppointmentResponse cancelAppointment(Long appointmentId, String email) {
         return null;
     }
+
+    @Override
+    public void changePassword(String email, ChangePasswordRequest request) {
+        ApplicationUser user = repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (!encoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+        user.setPassword(encoder.encode(request.getNewPassword()));
+        repo.save(user);
+    }
+
+
 }

@@ -18,12 +18,15 @@ public class JwtUtil {
     private long validityMs;
 
     //generate token
-    public String generateToken(String email){
+    public String generateToken(String email,String userName,String role){
         return Jwts.builder()
                 .setSubject(email)
+                .claim("name", userName)
+                .claim("role", role)//  adds name as a custom claim
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+validityMs))
-                .signWith(SignatureAlgorithm.HS256,secret).compact();
+                .setExpiration(new Date(System.currentTimeMillis() + validityMs))
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
     }
     public String extractEmail(String token) {
         return Jwts.parser().setSigningKey(secret)

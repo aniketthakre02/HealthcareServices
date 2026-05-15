@@ -25,6 +25,7 @@ public class AdminController {
         return adminService.getAllUsers();
     }
     @GetMapping("/users/{id}")
+
     public UserResponse getUser(@PathVariable String id) {
         return adminService.getUserById(id);
     }

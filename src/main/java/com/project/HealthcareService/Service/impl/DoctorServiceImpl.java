@@ -11,6 +11,7 @@ import com.project.HealthcareService.Service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,9 @@ public class DoctorServiceImpl implements DoctorService {
                .gender(doctor.getGender())
                .specialization(doctor.getSpecialization())
                .contact(doctor.getContact())
+               .availability(doctor.getAvailability())
+               .introduction(doctor.getIntroduction())
+               .experience(doctor.getExperience())
                .build();
     }
 
@@ -60,22 +64,65 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.setAge(request.getAge());
         doctor.setSpecialization(request.getSpecialization());
         doctor.setContact(request.getContact());
+        doctor.setAvailability(request.getAvailability());
+        doctor.setExperience(request.getExperience());
+        doctor.setIntroduction(request.getIntroduction());
         doctorRepo.save(doctor);
         return mapToResponse(doctor);
     }
-    @Override
-    public List<Appointment> getMyAppointments(String email){
-        ApplicationUser user=repo.findByEmail(email)
-                .orElseThrow(()->new RuntimeException("User not Found"));
-        if (!user.getRoles().contains(Role.ROLE_DOCTOR)) {
-            throw new RuntimeException("Access denied: not a doctor");
-        }
+//    @Override
+//    public List<AppointmentResponse> getMyAppointments(String email){
+//        ApplicationUser user=repo.findByEmail(email)
+//                .orElseThrow(()->new RuntimeException("User not Found"));
+//        if (!user.getRoles().contains(Role.ROLE_DOCTOR)) {
+//            throw new RuntimeException("Access denied: not a doctor");
+//        }
+//        return appointmentRepo.findByDoctorId(user.getUserId());
+//    }
+@Override
+public List<AppointmentResponse> getMyAppointments(String email) {
+    ApplicationUser user = repo.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not Found"));
 
-        return appointmentRepo.findByDoctorId(user.getUserId());
+    if (!user.getRoles().contains(Role.ROLE_DOCTOR)) {
+        throw new RuntimeException("Access denied: not a doctor");
     }
 
+    return appointmentRepo.findByDoctorId(user.getUserId())
+            .stream()
+            .map(appt -> AppointmentResponse.builder()
+                    .id(appt.getId())
+                    .patientEmail(appt.getPatientEmail())
+                    .doctorId(appt.getDoctorId())
+                    .dateTime(appt.getDateTime())
+                    .reason(appt.getReason())
+                    .status(appt.getStatus())
+                    .build()
+            )
+            .collect(Collectors.toList());
+}
     @Override
     public AppointmentResponse updateAppointmentStatus(Long appointmentId, AppointmentStatus status) {
         return null;
+    }
+
+    @Override
+    public List<DoctorProfileResponse> getAllDoctors(){
+        return doctorRepo.findAll()
+                .stream()
+                .map(doctor->DoctorProfileResponse.builder()
+                        .userId(doctor.getUserId())
+                        .name(doctor.getUserName())
+                        .specialization(doctor.getSpecialization())
+                        .experience(doctor.getExperience())
+                        .availability(doctor.getAvailability())
+                        .introduction(doctor.getIntroduction())
+                        .age(doctor.getAge())
+                        .email(doctor.getUser().getEmail())
+                        .gender(doctor.getGender())
+                        .contact(doctor.getContact())
+                        .build()
+                )
+                .collect(Collectors.toList());
     }
 }

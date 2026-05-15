@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 
-import static com.project.HealthcareService.Model.Role.ROLE_PATIENT;
+import static com.project.HealthcareService.Model.Role.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +44,24 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email,password)
         );
+        ApplicationUser user = repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 //        System.out.println("did it authenticate");
-        return jwtUtil.generateToken(email);
+
+//        String role = user.getRoles()
+//                .stream()
+//                .findFirst()
+//                .map(r -> r.name())
+//                .orElse("ROLE_PATIENT");
+        String role;
+        if (user.getRoles().contains(ROLE_ADMIN)) {
+            role = "ROLE_ADMIN";
+        } else if (user.getRoles().contains(ROLE_DOCTOR)) {
+            role = "ROLE_DOCTOR";
+        } else {
+            role = "ROLE_PATIENT";
+        }
+        return jwtUtil.generateToken(email,user.getUserName(),role);
     }
     @Override
     public List<ApplicationUser> getAllUsers() {
@@ -61,4 +77,3 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         return false;
     }
 }
-
