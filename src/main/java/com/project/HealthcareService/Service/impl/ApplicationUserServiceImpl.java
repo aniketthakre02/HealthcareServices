@@ -1,5 +1,6 @@
 package com.project.HealthcareService.Service.impl;
 
+import com.project.HealthcareService.DTOs.request.RegisterRequest;
 import com.project.HealthcareService.Exception.UserAlreadyExistsException;
 import com.project.HealthcareService.Model.ApplicationUser;
 import com.project.HealthcareService.Repository.ApplicationUserRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.project.HealthcareService.Model.Role.*;
 
@@ -24,35 +26,26 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     private final AuthenticationManager authManager;
     private final JwtUtil jwtUtil;
     @Override
-    public boolean register(ApplicationUser user) {
-        if (repo.existsByEmail(user.getEmail())) {
+    public void register(RegisterRequest request) {
+        if (repo.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException(
-                    "User already exists with email: " + user.getEmail()
+                    "User already exists with email: " + request.getEmail()
             );
         }
-        if (user.getRoles() == null) {
-            user.setRoles(new HashSet<>());
-        }
-       user.setPassword(encoder.encode(user.getPassword()));
-       user.getRoles().add(ROLE_PATIENT);
-       repo.save(user);
-       return true;
+        ApplicationUser user=new ApplicationUser();
+        user.setUserName(request.getUserName());
+        user.setEmail(request.getEmail());
+        user.setPassword(encoder.encode(request.getPassword()));
+        user.setRoles(new HashSet<>(Set.of(ROLE_PATIENT)));
+        repo.save(user);
     }
     @Override
     public String login(String email, String password) {
-//        System.out.println("do we come in login");
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email,password)
         );
         ApplicationUser user = repo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-//        System.out.println("did it authenticate");
-
-//        String role = user.getRoles()
-//                .stream()
-//                .findFirst()
-//                .map(r -> r.name())
-//                .orElse("ROLE_PATIENT");
         String role;
         if (user.getRoles().contains(ROLE_ADMIN)) {
             role = "ROLE_ADMIN";

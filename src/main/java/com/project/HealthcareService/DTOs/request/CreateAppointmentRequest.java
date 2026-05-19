@@ -17,5 +17,4 @@ public class CreateAppointmentRequest {
     @NotBlank(message = "Reason is required")
     private String reason;
     private String doctorName;
-
 }

@@ -1,8 +1,12 @@
 package com.project.HealthcareService.Controller;
 
+import com.project.HealthcareService.DTOs.request.AuthResponse;
+import com.project.HealthcareService.DTOs.request.LoginRequest;
+import com.project.HealthcareService.DTOs.request.RegisterRequest;
 import com.project.HealthcareService.Model.ApplicationUser;
 import com.project.HealthcareService.Service.ApplicationUserService;
 import com.project.HealthcareService.security.JwtUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,32 +19,21 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class ApplicationUserController {
     private  final ApplicationUserService userService;
     private final JwtUtil jwtUtil;
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody ApplicationUser user) {
-        try {
-            userService.register(user);
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
+        userService.register(request);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body("User registered successfully");
-        } catch (RuntimeException ex) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(ex.getMessage());
-        }
     }
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String,String> req){
-        String email=req.get("email");
-        String password=req.get("password");
-        String token= userService.login(email,password);
-        System.out.println(token);
-        Map<String,Object>res=new HashMap<>();
-        res.put("token",token);
-        return res;
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest req){
+        String token= userService.login(req.getEmail(), req.getPassword());
+        return ResponseEntity.ok(new AuthResponse(token));
     }
-
 }
