@@ -31,6 +31,7 @@ public class ApplicationUserController {
                     .status(HttpStatus.CREATED)
                     .body("User registered successfully");
     }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest req){
         String token= userService.login(req.getEmail(), req.getPassword());
