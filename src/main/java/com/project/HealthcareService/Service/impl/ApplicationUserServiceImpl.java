@@ -41,9 +41,14 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     }
     @Override
     public String login(String email, String password) {
-        authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email,password)
-        );
+        try {
+            authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+        } catch (Exception e) {
+            System.out.println("AUTH FAILED: " + e.getClass().getName() + " - " + e.getMessage());
+            throw e;
+        }
         ApplicationUser user = repo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         String role;
